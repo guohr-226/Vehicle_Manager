@@ -59,7 +59,7 @@ class LogicHTTPHandler(BaseHTTPRequestHandler):
             # 验证用户
             success, user_id, is_admin = self.db.verify_user(name, password)
 
-            print("verify_user done", "success:", success,"user_id:", user_id, "is_admin:", is_admin)
+            # print("verify_user done", "success:", success,"user_id:", user_id, "is_admin:", is_admin)
 
             if success and user_id != -1:
                 role = "admin" if is_admin else "user"
