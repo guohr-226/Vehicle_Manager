@@ -1,7 +1,7 @@
 import threading
 import time
 from http_user_server import run_user_server
-from http_logic_server import run_logic_server
+from http_login_server import run_login_server
 from http_admin_server import run_admin_server
 from mqtt_server import MqttJsonVehicleWriter
 
@@ -10,10 +10,10 @@ def start_http_user_server():
     print("准备启动用户服务器...")
     run_user_server()
 
-def start_http_logic_server():
-    """启动逻辑HTTP服务器"""
-    print("准备启动逻辑服务器...")
-    run_logic_server()
+def start_http_login_server():
+    """启动登录HTTP服务器"""
+    print("准备启动登录服务器...")
+    run_login_server()
 
 def start_http_admin_server():
     """启动管理员HTTP服务器"""
@@ -47,7 +47,7 @@ if __name__ == "__main__":
         # 创建线程分别启动四个服务
         threads = [
             threading.Thread(target=start_http_user_server, daemon=True),
-            threading.Thread(target=start_http_logic_server, daemon=True),
+            threading.Thread(target=start_http_login_server, daemon=True),
             threading.Thread(target=start_http_admin_server, daemon=True),
             threading.Thread(target=start_mqtt_server, daemon=True)
         ]

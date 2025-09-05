@@ -2,7 +2,7 @@ import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from vehicle_db import VehicleDB
 
-class LogicHTTPHandler(BaseHTTPRequestHandler):
+class LoginHTTPHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.db = VehicleDB()
         if not self.db.initialize():
@@ -51,7 +51,8 @@ class LogicHTTPHandler(BaseHTTPRequestHandler):
             password = params.get('password')
             
             if not name or not password:
-                response = "error"
+                # 修改此处的响应格式，返回标准JSON对象
+                response = {"success": False, "message": "用户名或密码不能为空"}
                 self._set_response(400)
                 self.wfile.write(json.dumps(response).encode('utf-8'))
                 return
@@ -59,31 +60,31 @@ class LogicHTTPHandler(BaseHTTPRequestHandler):
             # 验证用户
             success, user_id, is_admin = self.db.verify_user(name, password)
 
-            # print("verify_user done", "success:", success,"user_id:", user_id, "is_admin:", is_admin)
-
             if success and user_id != -1:
                 role = "admin" if is_admin else "user"
-                response = role
+                response = {"success": True, "role": role}
             else:
-                response = "error"
+                response = {"success": False, "message": "用户名或密码错误"}
                 
             self._set_response()
             self.wfile.write(json.dumps(response).encode('utf-8'))
             
         else:
             self._set_response(404)
-            self.wfile.write(json.dumps("error").encode('utf-8'))
+            # 统一错误响应格式
+            response = {"success": False, "message": "接口不存在"}
+            self.wfile.write(json.dumps(response).encode('utf-8'))
 
-def run_logic_server():
+def run_login_server():
     server_address = ('', 12344)
-    httpd = HTTPServer(server_address, LogicHTTPHandler)
-    print('逻辑服务器启动，监听端口 12344...')
+    httpd = HTTPServer(server_address, LoginHTTPHandler)
+    print('登录服务器启动，监听端口 12344...')
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
     httpd.server_close()
-    print('逻辑服务器已关闭')
+    print('登录服务器已关闭')
 
 if __name__ == '__main__':
-    run_logic_server()
+    run_login_server()
