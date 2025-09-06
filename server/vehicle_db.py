@@ -96,9 +96,14 @@ class VehicleDB:
         """添加测试数据，返回是否成功"""
         def operation():
             # 添加测试用户
-            success, msg = self.add_user("test_user", "test123", False)
+            success, msg = self.add_user("test_user0", "test123", False)
             if not success:
-                print(f"添加测试用户失败: {msg}")
+                print(f"添加测试用户0失败: {msg}")
+                return False
+            
+            success, msg = self.add_user("test_user1", "test456", False)
+            if not success:
+                print(f"添加测试用户1失败: {msg}")
                 return False
 
             # 添加测试传感器
@@ -118,20 +123,30 @@ class VehicleDB:
                 return False
 
             # 获取测试用户ID
-            valid, user_id, _ = self.verify_user("test_user", "test123")
-            if not valid or user_id == -1:
-                print("验证测试用户失败，无法获取用户ID")
+            valid, user_id0, _ = self.verify_user("test_user0", "test123")
+            if not valid or user_id0 == -1:
+                print("验证测试用户失败，无法获取用户0ID")
+                return False
+
+            valid, user_id1, _ = self.verify_user("test_user1", "test456")
+            if not valid or user_id1 == -1:
+                print("验证测试用户失败，无法获取用户1ID")
                 return False
 
             # 添加测试车辆
-            success, msg = self.add_vehicle("ABC123", user_id)
+            success, msg = self.add_vehicle("ABC123", user_id0)
             if not success:
                 print(f"添加车辆ABC123失败: {msg}")
                 return False
                 
-            success, msg = self.add_vehicle("XYZ789", user_id)
+            success, msg = self.add_vehicle("XYZ789", user_id0)
             if not success:
                 print(f"添加车辆XYZ789失败: {msg}")
+                return False
+            
+            success, msg = self.add_vehicle("CDE567", user_id1)
+            if not success:
+                print(f"添加车辆CDE567失败: {msg}")
                 return False
 
             # 获取传感器ID
@@ -162,6 +177,11 @@ class VehicleDB:
             success, msg = self.add_passage_record("XYZ789", sensor1['id'])
             if not success:
                 print(f"添加XYZ789通过sensor_001的记录失败: {msg}")
+                return False
+
+            success, msg = self.add_passage_record("CDE567", sensor1['id'])
+            if not success:
+                print(f"添加CDE567通过sensor_001的记录失败: {msg}")
                 return False
 
             return True  # 所有步骤成功

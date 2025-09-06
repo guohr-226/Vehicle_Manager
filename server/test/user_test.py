@@ -35,7 +35,7 @@ def test_user_apis():
     assert resp.json()["success"] == True
     
     print("\n测试查询车辆信息...")
-    resp = requests.get(f"{BASE_URL}/get_next_vehicle_info?name={TEST_USER}&vehicle_id={TEST_VEHICLE}")
+    resp = requests.get(f"{BASE_URL}/get_user_vehicle_info?name={TEST_USER}&vehicle_id={TEST_VEHICLE}")
     print(f"  响应: {resp.json()}")
     assert resp.json()["success"] == True
 

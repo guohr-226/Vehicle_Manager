@@ -7,7 +7,7 @@ import json
 def main():
     # 初始化数据库连接
     db = VehicleDB()
-    if not db.initialize("/home/ghr226/iot/server/vehicle_db.db"):
+    if not db.initialize("/home/ghr226/Vehicle_Manager/server/vehicle_db.db"):
         print("数据库初始化失败，无法继续操作")
         return
 

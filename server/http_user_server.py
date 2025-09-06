@@ -53,22 +53,12 @@ class UserHTTPHandler(BaseHTTPRequestHandler):
                 return user['id']
         return None
 
-    def _is_vehicle_owned_by_user(self, vehicle_id, user_id):
+    def _is_vehicle_owned_by_user(self, vehicle_id, name):
         """验证车辆是否属于用户"""
         success, vehicle_info = self.db.get_vehicle_status(vehicle_id)
         if not success or not vehicle_info:
             return False
-        
-        # 获取用户名下所有车辆
-        success, vehicles, _ = self.db.get_vehicles(limit=1000)
-        if not success:
-            return False
-            
-        for vehicle in vehicles:
-            # 这里简化处理，实际应通过registered_by验证
-            if vehicle['vehicle_id'] == vehicle_id:
-                return True
-        return False
+        return vehicle_info.get('registered_by') == name
 
     def do_GET(self):
         self._handle_request()
@@ -157,7 +147,7 @@ class UserHTTPHandler(BaseHTTPRequestHandler):
             self._set_response()
             self.wfile.write(json.dumps(response).encode('utf-8'))
             
-        elif path == '/get_next_vehicle_info':
+        elif path == '/get_user_vehicle_info':
             vehicle_id = params.get('vehicle_id')
             user_id = self._get_user_id(name)
             
@@ -166,9 +156,11 @@ class UserHTTPHandler(BaseHTTPRequestHandler):
                 self._set_response(400)
                 self.wfile.write(json.dumps(response).encode('utf-8'))
                 return
-                
+            
+            print("get_user_vehicle_info", vehicle_id, user_id)
+
             # 验证车辆是否属于用户
-            if not self._is_vehicle_owned_by_user(vehicle_id, user_id):
+            if not self._is_vehicle_owned_by_user(vehicle_id, name):
                 response = {"success": False, "message": "无权访问该车辆信息"}
                 self._set_response(403)
                 self.wfile.write(json.dumps(response).encode('utf-8'))

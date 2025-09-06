@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # 服务器配置
-LOGIC_SERVER = 'http://localhost:12344'
+LOGIN_SERVER = 'http://localhost:12344'
 ADMIN_SERVER = 'http://localhost:12345'
 USER_SERVER = 'http://localhost:12346'
 
@@ -44,7 +44,7 @@ def login():
             return render_template('login.html', error='用户名和密码不能为空')
             
         result = handle_request(
-            f"{LOGIC_SERVER}/verify_user_and_get_role",
+            f"{LOGIN_SERVER}/verify_user_and_get_role",
             method='post',
             json={'name': name, 'password': password}
         )
@@ -326,11 +326,13 @@ def user_change_own_password():
     if not is_user():
         return jsonify({'success': False, 'message': '权限不足'})
     
+    data = request.get_json()
     payload = {
         'name': session['username'],
-        'old_password': request.form.get('old_password'),
-        'password': request.form.get('new_password')
+        'old_password': data.get('old_password'),
+        'password': data.get('password') 
     }
+    print("change_own_password", payload)
     
     if not payload['old_password'] or not payload['password']:
         return jsonify({'success': False, 'message': '旧密码和新密码为必填项'})
@@ -347,20 +349,22 @@ def user_get_user_vehicles():
     if not is_user():
         return jsonify({'success': False, 'message': '权限不足'})
     
+    # 构建分页参数，限制最大条数为100
     params = {
-        'name': session['username'],
-        'cursor': request.args.get('cursor', 0),
-        'limit': min(int(request.args.get('limit', 10)), 100)
+        'name': session['username'],  # 从会话中获取当前用户名
+        'cursor': request.args.get('cursor', 0),  # 分页游标，默认0
+        'limit': min(int(request.args.get('limit', 10)), 100)  # 每页数量，默认10，最大100
     }
     
     result = handle_request(
         f"{USER_SERVER}/get_user_vehicles",
+        method='get',
         params=params
     )
     return jsonify(result)
 
-@app.route('/user/get_next_vehicle_info')
-def user_get_next_vehicle_info():
+@app.route('/user/get_user_vehicle_info')
+def user_get_user_vehicle_info():
     if not is_user():
         return jsonify({'success': False, 'message': '权限不足'})
     
@@ -369,19 +373,10 @@ def user_get_next_vehicle_info():
         return jsonify({'success': False, 'message': '车辆ID为必填项'})
         
     result = handle_request(
-        f"{USER_SERVER}/get_next_vehicle_info",
+        f"{USER_SERVER}/get_user_vehicle_info",
         params={'name': session['username'], 'vehicle_id': vehicle_id}
     )
     return jsonify(result)
-
-# 兼容旧接口
-@app.route('/user/get_my_vehicles')
-def user_get_my_vehicles():
-    return redirect(url_for('user_get_user_vehicles', **request.args))
-
-@app.route('/user/get_my_info')
-def user_get_my_info():
-    return redirect(url_for('user_get_current_info',** request.args))
 
 @app.route('/logout')
 def logout():

@@ -4,27 +4,39 @@
       "id": 1,
       "name": "root",
       "is_admin": 1,
-      "created_at": "2025-09-04 15:05:30"
+      "created_at": "2025-09-06 04:43:18"
     },
     {
       "id": 2,
-      "name": "test_user",
+      "name": "test_user0",
       "is_admin": 0,
-      "created_at": "2025-09-04 15:05:30"
+      "created_at": "2025-09-06 04:43:18"
+    },
+    {
+      "id": 3,
+      "name": "test_user1",
+      "is_admin": 0,
+      "created_at": "2025-09-06 04:43:18"
     }
   ],
   "vehicles": [
     {
       "vehicle_id": "ABC123",
       "is_on_campus": 0,
-      "registered_by_name": "test_user",
-      "created_at": "2025-09-04 15:05:30"
+      "registered_by_name": "test_user0",
+      "created_at": "2025-09-06 04:43:18"
     },
     {
       "vehicle_id": "XYZ789",
       "is_on_campus": 1,
-      "registered_by_name": "test_user",
-      "created_at": "2025-09-04 15:05:30"
+      "registered_by_name": "test_user0",
+      "created_at": "2025-09-06 04:43:18"
+    },
+    {
+      "vehicle_id": "CDE567",
+      "is_on_campus": 1,
+      "registered_by_name": "test_user1",
+      "created_at": "2025-09-06 04:43:18"
     }
   ],
   "sensors": [
@@ -35,7 +47,7 @@
       "description": "入口主传感器",
       "is_active": 1,
       "is_gate": 1,
-      "created_at": "2025-09-04 15:05:30"
+      "created_at": "2025-09-06 04:43:18"
     },
     {
       "id": 2,
@@ -44,7 +56,7 @@
       "description": "出口主传感器",
       "is_active": 1,
       "is_gate": 1,
-      "created_at": "2025-09-04 15:05:30"
+      "created_at": "2025-09-06 04:43:18"
     },
     {
       "id": 3,
@@ -53,8 +65,8 @@
       "description": "停车区传感器",
       "is_active": 1,
       "is_gate": 0,
-      "created_at": "2025-09-04 15:05:30"
+      "created_at": "2025-09-06 04:43:18"
     }
   ],
-  "timestamp": "2025-09-04 23:07:47"
+  "timestamp": "2025-09-06 12:43:28"
 }
