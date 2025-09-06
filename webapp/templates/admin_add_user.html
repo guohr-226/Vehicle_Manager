@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加新用户 - 管理员界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-group input {
+            margin-right: 8px;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d5f5e3;
+            color: #27ae60;
+            display: block;
+        }
+        
+        .error {
+            background-color: #fadbd8;
+            color: #e74c3c;
+            display: block;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>添加新用户</h1>
+        
+        <form id="addUserForm">
+            <div class="form-group">
+                <label for="username">用户名 <span style="color: red;">*</span></label>
+                <input type="text" id="username" name="name" required placeholder="请输入用户名">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码 <span style="color: red;">*</span></label>
+                <input type="password" id="password" name="password" required placeholder="请输入密码">
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="isAdmin" name="is_admin" value="true">
+                <label for="isAdmin">设为管理员</label>
+            </div>
+            
+            <div>
+                <button type="submit" class="btn">添加用户</button>
+                <a href="/admin" class="btn btn-secondary">返回首页</a>
+            </div>
+            
+            <div id="message" class="message"></div>
+        </form>
+        
+        <div class="nav-links">
+            <li class="function-item"><a href="{{ url_for('admin_change_paseeword_page') }}" class="function-link">修改用户密码</a></li>
+            <li class="function-item"><a href="{{ url_for('admin_delete_user_page') }}" class="function-link">删除用户</a></li>
+            <li class="function-item"><a href="{{ url_for('admin_get_user_page') }}" class="function-link">查询用户信息</a></li>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const messageElement = document.getElementById('message');
+            
+            try {
+                const response = await fetch('/admin/add_user', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // 显示消息
+                messageElement.textContent = result.message;
+                if (result.success) {
+                    messageElement.className = 'message success';
+                    // 重置表单
+                    this.reset();
+                } else {
+                    messageElement.className = 'message error';
+                }
+                
+                // 3秒后隐藏成功消息
+                if (result.success) {
+                    setTimeout(() => {
+                        messageElement.style.display = 'none';
+                    }, 3000);
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，添加失败';
+                messageElement.className = 'message error';
+            }
+        });
+    </script>
+</body>
+</html>

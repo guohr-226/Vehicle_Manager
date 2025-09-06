@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户查询与列表 - 管理员界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #34495e;
+            margin: 20px 0 15px;
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d5f5e3;
+            color: #27ae60;
+            display: block;
+        }
+        
+        .error {
+            background-color: #fadbd8;
+            color: #e74c3c;
+            display: block;
+        }
+        
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            display: none;
+        }
+        
+        .result-box.visible {
+            display: block;
+        }
+        
+        .user-info p {
+            margin-bottom: 8px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .pagination {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .limit-control {
+            width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>用户查询与列表管理</h1>
+        
+        <!-- 单个用户查询区域 -->
+        <div class="section">
+            <h2>查询用户信息</h2>
+            <form id="userInfoForm" class="controls">
+                <div class="form-group" style="flex-grow: 1;">
+                    <label for="username">用户名 <span style="color: red;">*</span></label>
+                    <input type="text" id="username" name="name" required placeholder="请输入要查询的用户名">
+                </div>
+                <div style="align-self: flex-end;">
+                    <button type="submit" class="btn">查询</button>
+                </div>
+            </form>
+            
+            <div id="infoMessage" class="message"></div>
+            
+            <div id="userInfoResult" class="result-box">
+                <div class="user-info">
+                    <p><strong>用户名：</strong><span id="infoName">-</span></p>
+                    <p><strong>是否管理员：</strong><span id="infoIsAdmin">-</span></p>
+                    <p><strong>创建时间：</strong><span id="infoCreateTime">-</span></p>
+                    <p><strong>最后登录时间：</strong><span id="infoLastLogin">-</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 用户列表区域 -->
+        <div class="section">
+            <h2>用户列表</h2>
+            
+            <div class="controls">
+                <div class="form-group limit-control">
+                    <label for="limit">每页数量</label>
+                    <input type="number" id="limit" min="1" max="100" value="20" placeholder="1-100">
+                </div>
+                <div style="align-self: flex-end;">
+                    <button id="refreshList" class="btn">刷新列表</button>
+                </div>
+            </div>
+            
+            <div id="listMessage" class="message"></div>
+            
+            <div class="table-container">
+                <table id="userTable">
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>是否管理员</th>
+                            <th>创建时间</th>
+                            <th>最后登录时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <!-- 表格内容将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <div>
+                    总用户数: <span id="totalUsers">0</span>
+                </div>
+                <div>
+                    <button id="prevPage" class="btn btn-secondary" disabled>上一页</button>
+                    <button id="nextPage" class="btn btn-secondary" disabled>下一页</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; display: flex; justify-content: flex-end;">
+                <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <li class="function-item"><a href="{{ url_for('admin_add_user_page') }}" class="function-link">添加新用户</a></li>
+            <li class="function-item"><a href="{{ url_for('admin_change_paseeword_page') }}" class="function-link">修改用户密码</a></li>
+            <li class="function-item"><a href="{{ url_for('admin_delete_user_page') }}" class="function-link">删除用户</a></li>
+        </div>
+
+    </div>
+
+    <script>
+        // 全局变量存储分页信息
+        let currentCursor = 0;
+        let currentLimit = 20;
+        let nextCursor = null;
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 绑定表单提交事件
+            document.getElementById('userInfoForm').addEventListener('submit', fetchUserInfo);
+            
+            // 绑定列表刷新按钮事件
+            document.getElementById('refreshList').addEventListener('click', () => {
+                currentCursor = 0;
+                fetchUserList();
+            });
+            
+            // 绑定分页按钮事件
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentCursor > 0) {
+                    currentCursor = Math.max(0, currentCursor - currentLimit);
+                    fetchUserList();
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if (nextCursor !== null) {
+                    currentCursor = nextCursor;
+                    fetchUserList();
+                }
+            });
+            
+            // 初始化加载用户列表
+            fetchUserList();
+        });
+        
+        // 查询单个用户信息
+        async function fetchUserInfo(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const messageElement = document.getElementById('infoMessage');
+            const resultBox = document.getElementById('userInfoResult');
+            
+            try {
+                const response = await fetch(`/admin/get_user_info?name=${encodeURIComponent(username)}`);
+                const result = await response.json();
+                
+                // 显示消息
+                messageElement.textContent = result.message;
+                if (result.success) {
+                    messageElement.className = 'message success';
+                    
+                    // 显示用户信息
+                    if (result.data) {
+                        document.getElementById('infoName').textContent = result.data.name || '-';
+                        document.getElementById('infoIsAdmin').textContent = result.data.is_admin ? '是' : '否';
+                        document.getElementById('infoCreateTime').textContent = result.data.create_time || '-';
+                        document.getElementById('infoLastLogin').textContent = result.data.last_login || '-';
+                        resultBox.classList.add('visible');
+                    } else {
+                        resultBox.classList.remove('visible');
+                    }
+                } else {
+                    messageElement.className = 'message error';
+                    resultBox.classList.remove('visible');
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，查询失败';
+                messageElement.className = 'message error';
+                resultBox.classList.remove('visible');
+            }
+        }
+        
+        // 获取用户列表
+        async function fetchUserList() {
+            const limit = parseInt(document.getElementById('limit').value) || 20;
+            currentLimit = Math.min(Math.max(limit, 1), 100); // 确保在1-100范围内
+            
+            const messageElement = document.getElementById('listMessage');
+            const tableBody = document.getElementById('userTableBody');
+            const totalUsersElement = document.getElementById('totalUsers');
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            
+            // 清空表格和消息
+            tableBody.innerHTML = '';
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            
+            try {
+                const response = await fetch(`/admin/get_users?cursor=${currentCursor}&limit=${currentLimit}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageElement.className = 'message success';
+                    messageElement.textContent = `已加载 ${result.data.length} 条用户信息`;
+                    
+                    // 更新总用户数
+                    totalUsersElement.textContent = result.total || 0;
+                    
+                    // 存储下一页游标
+                    nextCursor = result.next_cursor;
+                    
+                    // 更新分页按钮状态
+                    prevButton.disabled = currentCursor === 0;
+                    nextButton.disabled = nextCursor === null;
+                    
+                    // 填充表格数据
+                    if (result.data && result.data.length > 0) {
+                        result.data.forEach(user => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${user.name || '-'}</td>
+                                <td>${user.is_admin ? '是' : '否'}</td>
+                                <td>${user.create_time || '-'}</td>
+                                <td>${user.last_login || '-'}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        const emptyRow = document.createElement('tr');
+                        emptyRow.innerHTML = `<td colspan="4" style="text-align: center;">没有找到用户数据</td>`;
+                        tableBody.appendChild(emptyRow);
+                    }
+                } else {
+                    messageElement.className = 'message error';
+                    messageElement.textContent = result.message || '获取用户列表失败';
+                    prevButton.disabled = true;
+                    nextButton.disabled = true;
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，加载用户列表失败';
+                messageElement.className = 'message error';
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+            }
+        }
+    </script>
+</body>
+</html>

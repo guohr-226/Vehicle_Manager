@@ -83,6 +83,12 @@ def user_dashboard():
     return render_template('user_dashboard.html')
 
 # 管理员接口
+@app.route('/admin/add_user_page')
+def admin_add_user_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_add_user.html')
+
 @app.route('/admin/add_user', methods=['POST'])
 def admin_add_user():
     if not is_admin():
@@ -105,6 +111,12 @@ def admin_add_user():
     )
     return jsonify(result)
 
+@app.route('/admin/change_paseeword_page')
+def admin_change_paseeword_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_change_paseeword.html')
+
 @app.route('/admin/change_password', methods=['POST'])
 def admin_change_password():
     if not is_admin():
@@ -125,6 +137,12 @@ def admin_change_password():
     )
     return jsonify(result)
 
+@app.route('/admin/delete_user_page')
+def admin_delete_user_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_delete_user.html')
+
 @app.route('/admin/delete_user', methods=['POST'])
 def admin_delete_user():
     if not is_admin():
@@ -140,6 +158,12 @@ def admin_delete_user():
         json={'name': name}
     )
     return jsonify(result)
+
+@app.route('/admin/get_user_page')
+def admin_get_user_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_get_user.html')
 
 @app.route('/admin/get_user_info')
 def admin_get_user_info():

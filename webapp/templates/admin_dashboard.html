@@ -1,13 +1,191 @@
 <!DOCTYPE html>
-<html>
-<head><title>管理员界面</title></head>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员操作中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .function-list {
+            list-style: none;
+        }
+        
+        .function-item {
+            margin-bottom: 12px;
+        }
+        
+        .function-link {
+            color: #3498db;
+            text-decoration: none;
+            padding: 6px 0;
+            display: inline-block;
+            transition: color 0.2s ease;
+            font-size: 0.95rem;
+        }
+        
+        .function-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        .logout-btn {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .user-info {
+            color: #666;
+            margin-right: 20px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
 <body>
-    <h2>管理员操作</h2>
-    <ul>
-        <li><a href="/admin/user_manage">用户管理</a></li>
-        <li><a href="/admin/sensor_manage">传感器管理</a></li>
-        <li><a href="/admin/vehicle_manage">车辆管理</a></li>
-    </ul>
-    <a href="/">退出</a>
+    <div class="container">
+        <header>
+            <h1>管理员操作中心</h1>
+            <div class="header-right">
+                <span class="user-info">当前用户: {{ session.username }}</span>
+                <a href="/logout" class="logout-btn">退出登录</a>
+            </div>
+        </header>
+        
+        <div class="card-container">
+            <!-- 用户管理卡片 -->
+            <div class="card">
+                <div class="card-header">用户管理</div>
+                <div class="card-body">
+                    <ul class="function-list">
+                        <li class="function-item"><a href="{{ url_for('admin_add_user_page') }}" class="function-link">添加新用户</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_change_paseeword_page') }}" class="function-link">修改用户密码</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_delete_user_page') }}" class="function-link">删除用户</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_get_user_page') }}" class="function-link">查询用户信息</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 传感器管理卡片 -->
+            <div class="card">
+                <div class="card-header" style="background-color: #2ecc71;">传感器管理</div>
+                <div class="card-body">
+                    <ul class="function-list">
+                        <li class="function-item"><a href="/admin/sensor_manage/add_or_update" class="function-link">添加/更新传感器</a></li>
+                        <li class="function-item"><a href="/admin/sensor_manage/delete" class="function-link">删除传感器</a></li>
+                        <li class="function-item"><a href="/admin/sensor_manage/query" class="function-link">查询传感器信息</a></li>
+                        <li class="function-item"><a href="/admin/sensor_manage/list" class="function-link">传感器列表（分页）</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 车辆管理卡片 -->
+            <div class="card">
+                <div class="card-header" style="background-color: #f39c12;">车辆管理</div>
+                <div class="card-body">
+                    <ul class="function-list">
+                        <li class="function-item"><a href="/admin/vehicle_manage/add" class="function-link">添加新车辆</a></li>
+                        <li class="function-item"><a href="/admin/vehicle_manage/delete" class="function-link">删除车辆</a></li>
+                        <li class="function-item"><a href="/admin/vehicle_manage/query" class="function-link">查询车辆信息</a></li>
+                        <li class="function-item"><a href="/admin/vehicle_manage/list" class="function-link">车辆列表（分页）</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
