@@ -165,10 +165,9 @@
                 <div class="card-header" style="background-color: #2ecc71;">传感器管理</div>
                 <div class="card-body">
                     <ul class="function-list">
-                        <li class="function-item"><a href="/admin/sensor_manage/add_or_update" class="function-link">添加/更新传感器</a></li>
-                        <li class="function-item"><a href="/admin/sensor_manage/delete" class="function-link">删除传感器</a></li>
-                        <li class="function-item"><a href="/admin/sensor_manage/query" class="function-link">查询传感器信息</a></li>
-                        <li class="function-item"><a href="/admin/sensor_manage/list" class="function-link">传感器列表（分页）</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_add_cursor_page') }}" class="function-link">添加/更新传感器</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_delete_cursor_page') }}" class="function-link">删除传感器</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_get_cursor_page') }}" class="function-link">查询传感器信息</a></li>
                     </ul>
                 </div>
             </div>

@@ -196,6 +196,12 @@ def admin_get_users():
     )
     return jsonify(result)
 
+@app.route('/admin/add_cursor_page')
+def admin_add_cursor_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_add_cursor.html')
+
 @app.route('/admin/add_or_update_sensor', methods=['POST'])
 def admin_add_or_update_sensor():
     if not is_admin():
@@ -219,6 +225,12 @@ def admin_add_or_update_sensor():
     )
     return jsonify(result)
 
+@app.route('/admin/delete_cursor_page')
+def admin_delete_cursor_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_delete_cursor.html')
+
 @app.route('/admin/delete_sensor', methods=['POST'])
 def admin_delete_sensor():
     if not is_admin():
@@ -234,6 +246,12 @@ def admin_delete_sensor():
         json={'sensor_id': sensor_id}
     )
     return jsonify(result)
+
+@app.route('/admin/get_cursor_page')
+def admin_get_cursor_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_get_cursor.html')
 
 @app.route('/admin/get_sensor_info')
 def admin_get_sensor_info():

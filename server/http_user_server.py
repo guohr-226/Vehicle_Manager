@@ -58,7 +58,7 @@ class UserHTTPHandler(BaseHTTPRequestHandler):
         success, vehicle_info = self.db.get_vehicle_status(vehicle_id)
         if not success or not vehicle_info:
             return False
-        return vehicle_info.get('registered_by') == name
+        return vehicle_info.get('registered_by_name') == name
 
     def do_GET(self):
         self._handle_request()
@@ -157,8 +157,6 @@ class UserHTTPHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(response).encode('utf-8'))
                 return
             
-            print("get_user_vehicle_info", vehicle_id, user_id)
-
             # 验证车辆是否属于用户
             if not self._is_vehicle_owned_by_user(vehicle_id, name):
                 response = {"success": False, "message": "无权访问该车辆信息"}
@@ -180,8 +178,6 @@ class UserHTTPHandler(BaseHTTPRequestHandler):
                 last_record = records[0]
                 vehicle_info['last_location'] = last_record['location']
                 vehicle_info['last_time'] = last_record['passage_time']
-                # 简单判断方向（这里假设sensor_001是入口，sensor_002是出口）
-                vehicle_info['last_direction'] = "in" if "东门" in last_record['location'] else "out"
                 
             response = {"success": True, "data": vehicle_info}
             self._set_response()

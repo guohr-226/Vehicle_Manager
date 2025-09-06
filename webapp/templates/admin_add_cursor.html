@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加/更新传感器 - 管理员界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .section-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.2s;
+        }
+        
+        .tab.active {
+            border-bottom-color: #2ecc71;
+            color: #2ecc71;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus,
+        select:focus {
+            border-color: #2ecc71;
+            outline: none;
+        }
+        
+        .btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .search-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-group .form-group {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+        
+        .search-group button {
+            align-self: flex-end;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d5f5e3;
+            color: #27ae60;
+            display: block;
+        }
+        
+        .error {
+            background-color: #fadbd8;
+            color: #e74c3c;
+            display: block;
+        }
+        
+        .sensor-info {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            display: none;
+        }
+        
+        .sensor-info.visible {
+            display: block;
+        }
+        
+        .form-actions {
+            margin-top: 30px;
+        }
+        
+        .nav-links {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>添加/更新传感器</h1>
+        
+        <div class="section-tabs">
+            <div class="tab active" data-tab="add-sensor">添加新传感器</div>
+            <div class="tab" data-tab="update-sensor">更新传感器</div>
+        </div>
+        
+        <!-- 添加传感器表单 -->
+        <div class="tab-content active" id="add-sensor">
+            <form id="addSensorForm">
+                <div class="form-group">
+                    <label for="newSensorId">传感器ID <span style="color: red;">*</span></label>
+                    <input type="text" id="newSensorId" name="sensor_id" required placeholder="请输入传感器唯一标识">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newSensorLocation">安装位置 <span style="color: red;">*</span></label>
+                    <input type="text" id="newSensorLocation" name="location" required placeholder="请输入安装位置">
+                </div>
+                
+                <div class="form-group">
+                    <label for="isGateAdd">是否为出入口传感器 <span style="color: red;">*</span></label>
+                    <select id="isGateAdd" name="is_gate" required>
+                        <option value="false">否</option>
+                        <option value="true">是</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">添加传感器</button>
+                    <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
+                </div>
+                
+                <div id="addMessage" class="message"></div>
+            </form>
+        </div>
+        
+        <!-- 更新传感器表单 -->
+        <div class="tab-content" id="update-sensor">
+            <div class="search-group">
+                <div class="form-group">
+                    <label for="sensorId">传感器ID <span style="color: red;">*</span></label>
+                    <input type="text" id="sensorId" required placeholder="请输入要更新的传感器ID">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button id="searchSensor" class="btn">查询传感器</button>
+                <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
+            </div>
+            
+            <div id="sensorInfo" class="sensor-info">
+                <form id="updateSensorForm">
+                    <input type="hidden" id="updateSensorId" name="sensor_id">
+                    
+                    <div class="form-group">
+                        <label for="updateSensorLocation">安装位置 <span style="color: red;">*</span></label>
+                        <input type="text" id="updateSensorLocation" name="location" required placeholder="请输入安装位置">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="isGateUpdate">是否为出入口传感器 <span style="color: red;">*</span></label>
+                        <select id="isGateUpdate" name="is_gate" required>
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn">更新传感器</button>
+                        <button type="button" id="resetUpdateForm" class="btn btn-secondary">重置</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="updateMessage" class="message"></div>
+        </div>
+        
+        <div class="nav-links">
+            <li class="function-item"><a href="{{ url_for('admin_delete_cursor_page') }}" class="function-link">删除传感器</a></li>
+            <li class="function-item"><a href="{{ url_for('admin_get_cursor_page') }}" class="function-link">查询传感器信息</a></li>
+        </div>
+    </div>
+
+    <script>
+        // 切换标签页
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有标签和内容的active类
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // 为当前点击的标签和对应内容添加active类
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // 添加传感器表单提交
+        document.getElementById('addSensorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const messageElement = document.getElementById('addMessage');
+            
+            try {
+                const response = await fetch('/admin/add_sensor', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // 显示消息
+                messageElement.textContent = result.message;
+                if (result.success) {
+                    messageElement.className = 'message success';
+                    // 重置表单
+                    this.reset();
+                } else {
+                    messageElement.className = 'message error';
+                }
+                
+                // 3秒后隐藏成功消息
+                if (result.success) {
+                    setTimeout(() => {
+                        messageElement.style.display = 'none';
+                    }, 3000);
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，添加失败';
+                messageElement.className = 'message error';
+            }
+        });
+        
+        // 查询传感器信息
+        document.getElementById('searchSensor').addEventListener('click', async function() {
+            const sensorId = document.getElementById('sensorId').value;
+            const messageElement = document.getElementById('updateMessage');
+            const sensorInfoElement = document.getElementById('sensorInfo');
+            
+            if (!sensorId) {
+                messageElement.textContent = '请输入传感器ID';
+                messageElement.className = 'message error';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/get_sensor_info?sensor_id=${encodeURIComponent(sensorId)}`);
+                const result = await response.json();
+                
+                // 显示消息
+                messageElement.textContent = result.message;
+                if (result.success && result.data) {
+                    messageElement.className = 'message success';
+                    
+                    // 填充表单数据
+                    const sensorData = result.data;
+                    document.getElementById('updateSensorId').value = sensorData.sensor_id || '';
+                    document.getElementById('updateSensorLocation').value = sensorData.location || '';
+                    document.getElementById('isGateUpdate').value = sensorData.is_gate ? 'true' : 'false';
+                    
+                    // 显示表单
+                    sensorInfoElement.classList.add('visible');
+                } else {
+                    messageElement.className = 'message error';
+                    sensorInfoElement.classList.remove('visible');
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，查询失败';
+                messageElement.className = 'message error';
+                sensorInfoElement.classList.remove('visible');
+            }
+        });
+        
+        // 更新传感器表单提交
+        document.getElementById('updateSensorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const messageElement = document.getElementById('updateMessage');
+            
+            try {
+                const response = await fetch('/admin/update_sensor', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // 显示消息
+                messageElement.textContent = result.message;
+                if (result.success) {
+                    messageElement.className = 'message success';
+                } else {
+                    messageElement.className = 'message error';
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，更新失败';
+                messageElement.className = 'message error';
+            }
+        });
+        
+        // 重置更新表单
+        document.getElementById('resetUpdateForm').addEventListener('click', function() {
+            document.getElementById('updateSensorForm').reset();
+            document.getElementById('updateMessage').textContent = '';
+            document.getElementById('updateMessage').className = 'message';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>删除传感器 - 管理员界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #2ecc71;
+            outline: none;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            border: 1px solid #ffeeba;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .warning-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            margin-top: 2px;
+        }
+        
+        .btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            margin-left: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d5f5e3;
+            color: #27ae60;
+            display: block;
+        }
+        
+        .error {
+            background-color: #fadbd8;
+            color: #e74c3c;
+            display: block;
+        }
+        
+        .sensor-preview {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            display: none;
+        }
+        
+        .sensor-preview.visible {
+            display: block;
+        }
+        
+        .sensor-preview p {
+            margin-bottom: 8px;
+        }
+        
+        .preview-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .nav-links {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .search-row .form-group {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>删除传感器</h1>
+        
+        <div class="warning">
+            <div class="warning-icon">⚠️</div>
+            <div>
+                <strong>警告：</strong>删除传感器操作不可恢复，相关历史数据可能会受到影响。请确认该传感器不再使用后再执行删除操作。
+            </div>
+        </div>
+        
+        <div class="search-row">
+            <div class="form-group">
+                <label for="sensorId">传感器ID <span style="color: red;">*</span></label>
+                <input type="text" id="sensorId" required placeholder="请输入要删除的传感器ID">
+            </div>
+            <button id="searchSensor" class="btn btn-secondary">查询传感器</button>
+        </div>
+        
+        <div id="sensorPreview" class="sensor-preview">
+            <div class="preview-title">传感器信息预览</div>
+            <p><strong>传感器ID：</strong><span id="previewSensorId">-</span></p>
+            <p><strong>安装位置：</strong><span id="previewLocation">-</span></p>
+            <p><strong>是否为出入口传感器：</strong><span id="previewIsGate">-</span></p>
+        </div>
+        
+        <div class="action-buttons">
+            <button id="deleteButton" class="btn" disabled>确认删除</button>
+            <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <div class="nav-links">
+            <li class="function-item"><a href="{{ url_for('admin_add_cursor_page') }}" class="function-link">添加/更新传感器</a></li>
+            <li class="function-item"><a href="{{ url_for('admin_get_cursor_page') }}" class="function-link">查询传感器信息</a></li>
+        </div>
+    </div>
+
+    <script>
+        // 存储当前查询到的传感器ID
+        let currentSensorId = null;
+        
+        // 查询传感器信息
+        document.getElementById('searchSensor').addEventListener('click', async function() {
+            const sensorId = document.getElementById('sensorId').value.trim();
+            const messageElement = document.getElementById('message');
+            const previewElement = document.getElementById('sensorPreview');
+            const deleteButton = document.getElementById('deleteButton');
+            
+            // 重置状态
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            previewElement.classList.remove('visible');
+            deleteButton.disabled = true;
+            currentSensorId = null;
+            
+            if (!sensorId) {
+                messageElement.textContent = '请输入传感器ID';
+                messageElement.className = 'message error';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/get_sensor_info?sensor_id=${encodeURIComponent(sensorId)}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // 显示传感器信息
+                    messageElement.textContent = '传感器查询成功';
+                    messageElement.className = 'message success';
+                    
+                    // 填充预览信息
+                    document.getElementById('previewSensorId').textContent = result.data.sensor_id || '-';
+                    document.getElementById('previewLocation').textContent = result.data.location || '-';
+                    document.getElementById('previewIsGate').textContent = result.data.is_gate ? '是' : '否';
+                    
+                    // 显示预览区域并启用删除按钮
+                    previewElement.classList.add('visible');
+                    deleteButton.disabled = false;
+                    currentSensorId = sensorId;
+                } else {
+                    messageElement.textContent = result.message || '未找到该传感器';
+                    messageElement.className = 'message error';
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，查询失败';
+                messageElement.className = 'message error';
+            }
+        });
+        
+        // 确认删除传感器
+        document.getElementById('deleteButton').addEventListener('click', async function() {
+            if (!currentSensorId) {
+                return;
+            }
+            
+            // 二次确认
+            if (!confirm(`确定要删除传感器ID为"${currentSensorId}"的传感器吗？此操作不可恢复！`)) {
+                return;
+            }
+            
+            const messageElement = document.getElementById('message');
+            const previewElement = document.getElementById('sensorPreview');
+            const deleteButton = document.getElementById('deleteButton');
+            
+            try {
+                const formData = new FormData();
+                formData.append('sensor_id', currentSensorId);
+                
+                const response = await fetch('/admin/delete_sensor', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageElement.textContent = result.message || '传感器删除成功';
+                    messageElement.className = 'message success';
+                    
+                    // 重置界面状态
+                    previewElement.classList.remove('visible');
+                    deleteButton.disabled = true;
+                    document.getElementById('sensorId').value = '';
+                    currentSensorId = null;
+                } else {
+                    messageElement.textContent = result.message || '删除失败';
+                    messageElement.className = 'message error';
+                }
+            } catch (error) {
+                messageElement.textContent = '网络错误，删除失败';
+                messageElement.className = 'message error';
+            }
+        });
+    </script>
+</body>
+</html>
+    
