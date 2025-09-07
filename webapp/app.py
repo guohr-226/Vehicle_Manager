@@ -177,7 +177,6 @@ def admin_get_user_info():
         f"{ADMIN_SERVER}/get_user_info",
         params={'name': name}
     )
-    print("get_user_info", result)
     return jsonify(result)
 
 @app.route('/admin/get_users')
@@ -351,7 +350,6 @@ def admin_get_vehicle_info():
         f"{ADMIN_SERVER}/get_vehicle_info",
         params={'vehicle_id': vehicle_id}
     )
-    print("get_vehicle_info", result)
     return jsonify(result)
 
 @app.route('/admin/get_vehicles')
@@ -393,8 +391,6 @@ def user_change_own_password():
         'old_password': data.get('old_password'),
         'password': data.get('password') 
     }
-    print("change_own_password", payload)
-    
     if not payload['old_password'] or not payload['password']:
         return jsonify({'success': False, 'message': '旧密码和新密码为必填项'})
         
@@ -428,7 +424,6 @@ def user_get_user_vehicles():
 def user_get_user_vehicle_info():
     if not is_user():
         return jsonify({'success': False, 'message': '权限不足'})
-    
     vehicle_id = request.args.get('vehicle_id')
     if not vehicle_id:
         return jsonify({'success': False, 'message': '车辆ID为必填项'})

@@ -232,12 +232,20 @@
             font-style: italic;
         }
         
-        .error {
-            color: var(--error-color);
+        .success {
+            color: #27ae60;
+            padding: 10px;
+            background-color: #eafaf1;
+            border-radius: 4px;
+            margin-bottom: 15px;
         }
         
-        .success {
-            color: var(--success-color);
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fdedeb;
+            border-radius: 4px;
+            margin-bottom: 15px;
         }
 
         /* 列表视图样式 */
@@ -275,6 +283,103 @@
                 margin: 10px 0;
             }
         }
+        
+        /* 表格优化样式 */
+        #vehicleTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #vehicleTable th {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 500;
+        }
+
+        #vehicleTable td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        #vehicleTable .even-row {
+            background-color: #f9f9f9;
+        }
+
+        #vehicleTable .odd-row {
+            background-color: white;
+        }
+
+        #vehicleTable tr:hover {
+            background-color: rgba(52, 152, 219, 0.08);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        /* 状态标签样式 */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .status-on {
+            background-color: rgba(39, 174, 96, 0.15);
+            color: var(--success-color);
+        }
+
+        .status-off {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--error-color);
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            padding: 20px;
+        }
+
+        .empty-state .refresh-btn {
+            margin-top: 10px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* 车辆ID高亮 */
+        .vehicle-id {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        /* 分页控件样式优化 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-top: 1px solid var(--medium-gray);
+        }
+
+        .pagination button {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .pagination button:disabled {
+            background-color: var(--dark-gray);
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -302,7 +407,7 @@
             <div class="result" id="userInfoResult"></div>
         </div>
 
-        <!-- 密码修改区域 -->
+        <!-- 修改密码区域 -->
         <div id="change-password" class="section">
             <h3>修改密码</h3>
             <div class="form-group">
@@ -320,15 +425,53 @@
         <!-- 车辆查询区域 -->
         <div id="vehicle-query" class="section">
             <h3>我的车辆</h3>
-            <button onclick="getUserVehicles()">查询我的车辆列表</button>
+            
+            <div class="controls">
+                <div class="form-group limit-control">
+                    <label for="vehicleLimit">每页数量</label>
+                    <input type="number" id="vehicleLimit" min="1" max="100" value="10" placeholder="1-100">
+                </div>
+                <div style="align-self: flex-end;">
+                    <button onclick="getUserVehicles()">刷新车辆列表</button>
+                </div>
+            </div>
+            
             <div class="form-group">
                 <label>车辆ID：</label>
                 <input type="text" id="vehicleId" placeholder="输入车辆ID查询详情">
                 <button onclick="getVehicleInfo()">查询车辆详情</button>
             </div>
-            <div class="result" id="vehicleResult"></div>
+            
+            <div id="vehicleMessage" class="message"></div>
+            
+            <div class="table-container">
+                <table id="vehicleTable">
+                    <thead>
+                        <tr>
+                            <th>车辆ID</th>
+                            <th>车辆状态</th>
+                            <th>车主信息</th>
+                            <th>创建时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicleTableBody">
+                        <!-- 表格内容将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination">
+                <div>
+                    总车辆数: <span id="totalVehicles">0</span>
+                </div>
+                <div>
+                    <button id="prevVehiclePage" class="btn btn-secondary" disabled>上一页</button>
+                    <button id="nextVehiclePage" class="btn btn-secondary" disabled>下一页</button>
+                </div>
+            </div>
+            
+            <div id="vehicleDetailResult" class="result-box"></div>
         </div>
-    </div>
 
     <script>
         // 确保DOM加载完成后再执行
@@ -389,7 +532,76 @@
                 return html;
             }
 
-            // 获取个人信息
+            // 个人信息转中文表格格式
+            function userInfoToTable(responseData) {
+                // 提取success状态并单独展示
+                const successHtml = responseData.success ? 
+                    '<div class="success">操作成功</div>' : 
+                    `<div class="error">操作失败</div>`;
+                
+                // 获取嵌套的用户数据
+                const userData = responseData.data || {};
+                
+                // 定义字段显示顺序（这是控制顺序的关键）
+                const fieldOrder = ['name', 'is_admin', 'created_at'];
+                
+                // 定义中文字段映射
+                const fieldMap = {
+                    'name': '用户名',
+                    'is_admin': '是否为管理员',
+                    'created_at': '创建时间',
+                };
+                
+                // 处理is_admin的显示值（0/1转文字）
+                if (userData.is_admin !== undefined) {
+                    userData.is_admin = userData.is_admin === 1 ? '是' : '否';
+                }
+                
+                // 构建表格HTML
+                let tableHtml = `
+                    <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; margin-top: 10px;">
+                        <tbody>
+                `;
+                
+                // 按照字段顺序数组遍历，确保顺序正确
+                fieldOrder.forEach(key => {
+                    if (userData.hasOwnProperty(key)) {
+                        const label = fieldMap[key] || key;
+                        const value = userData[key] !== null && userData[key] !== undefined ? userData[key] : '-';
+                        
+                        tableHtml += `
+                            <tr>
+                                <td style="width: 20%; background-color: #f5f7fa; font-weight: bold;">${label}</td>
+                                <td style="width: 80%;">${value}</td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                // 如果有未在fieldOrder中定义的额外字段，也显示出来（可选）
+                for (const key in userData) {
+                    if (userData.hasOwnProperty(key) && !fieldOrder.includes(key)) {
+                        const label = fieldMap[key] || key;
+                        const value = userData[key] !== null && userData[key] !== undefined ? userData[key] : '-';
+                        
+                        tableHtml += `
+                            <tr>
+                                <td style="width: 20%; background-color: #f5f7fa; font-weight: bold;">${label}</td>
+                                <td style="width: 80%;">${value}</td>
+                            </tr>
+                        `;
+                    }
+                }
+                
+                tableHtml += `
+                        </tbody>
+                    </table>
+                `;
+                
+                // 组合成功状态和表格
+                return successHtml + tableHtml;
+            }
+            // 获取个人信息 - 优化为表格展示
             window.getUserInfo = function() {
                 const resultEl = document.getElementById('userInfoResult');
                 resultEl.innerHTML = '<p class="loading">加载中...</p>'; // 显示加载状态
@@ -402,14 +614,15 @@
                         return response.json();
                     })
                     .then(data => {
-                        resultEl.innerHTML = jsonToList(data);
+                        // 使用表格格式展示个人信息
+                        resultEl.innerHTML = userInfoToTable(data);
                     })
                     .catch(error => {
                         resultEl.innerHTML = `<p class="error">获取失败: ${error.message}</p>`;
                     });
             }
 
-            // 修改密码
+             // 修改密码功能（显示成功状态和失败原因）
             window.changePassword = function() {
                 const oldPwd = document.getElementById('oldPassword').value;
                 const newPwd = document.getElementById('newPassword').value;
@@ -422,10 +635,9 @@
                 
                 resultEl.innerHTML = '<p class="loading">处理中...</p>';
                 
-                // 注意：根据API文档，POST应该使用JSON请求体而非FormData
                 const requestData = {
                     old_password: oldPwd,
-                    password: newPwd // API文档中参数名为password而非new_password
+                    password: newPwd
                 };
 
                 fetch('/user/change_own_password', {
@@ -442,26 +654,69 @@
                     return response.json();
                 })
                 .then(data => {
-                    const className = data.success ? 'success' : 'error';
-                    resultEl.innerHTML = jsonToList(data);
-                    
-                    // 成功后清空输入框
                     if (data.success) {
+                        // 成功时只显示成功状态
+                        resultEl.innerHTML = '<p class="success">成功</p>';
+                        // 成功后清空输入框
                         document.getElementById('oldPassword').value = '';
                         document.getElementById('newPassword').value = '';
+                    } else {
+                        // 失败时显示失败原因（优先使用接口返回的message，没有则显示默认信息）
+                        const errorMsg = data.message || '修改密码失败，请稍后重试';
+                        resultEl.innerHTML = `<p class="error">失败：${errorMsg}</p>`;
                     }
                 })
                 .catch(error => {
-                    resultEl.innerHTML = `<p class="error">修改失败: ${error.message}</p>`;
+                    // 捕获网络错误等异常，显示具体错误原因
+                    resultEl.innerHTML = `<p class="error">失败：${error.message}</p>`;
                 });
             }
 
-            // 获取用户车辆列表
-            window.getUserVehicles = function() {
-                const resultEl = document.getElementById('vehicleResult');
-                resultEl.innerHTML = '<p class="loading">加载中...</p>';
+            // 车辆相关全局变量
+            let currentVehicleCursor = 0;
+            let currentVehicleLimit = 10;
+            let nextVehicleCursor = null;
+
+            // 页面加载完成后初始化车辆相关事件
+            document.addEventListener('DOMContentLoaded', function() {
+                // 车辆分页按钮事件绑定
+                document.getElementById('prevVehiclePage').addEventListener('click', () => {
+                    if (currentVehicleCursor > 0) {
+                        currentVehicleCursor = Math.max(0, currentVehicleCursor - currentVehicleLimit);
+                        getUserVehicles();
+                    }
+                });
                 
-                fetch('/user/get_user_vehicles')
+                document.getElementById('nextVehiclePage').addEventListener('click', () => {
+                    if (nextVehicleCursor !== null) {
+                        currentVehicleCursor = nextVehicleCursor;
+                        getUserVehicles();
+                    }
+                });
+            });
+
+            // 获取用户车辆列表（优化表格展示）
+            window.getUserVehicles = function() {
+                const limit = parseInt(document.getElementById('vehicleLimit').value) || 10;
+                currentVehicleLimit = Math.min(Math.max(limit, 1), 100); // 确保在1-100范围内
+                
+                const messageElement = document.getElementById('vehicleMessage');
+                const tableBody = document.getElementById('vehicleTableBody');
+                const totalVehiclesElement = document.getElementById('totalVehicles');
+                const prevButton = document.getElementById('prevVehiclePage');
+                const nextButton = document.getElementById('nextVehiclePage');
+                const detailResult = document.getElementById('vehicleDetailResult');
+                
+                // 清空表格和消息
+                tableBody.innerHTML = '';
+                messageElement.textContent = '';
+                messageElement.className = 'message';
+                detailResult.classList.remove('visible');
+                
+                messageElement.textContent = '加载中...';
+                messageElement.className = 'message loading';
+                
+                fetch(`/user/get_user_vehicles?cursor=${currentVehicleCursor}&limit=${currentVehicleLimit}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('网络响应不正常: ' + response.status);
@@ -469,24 +724,150 @@
                         return response.json();
                     })
                     .then(data => {
-                        resultEl.innerHTML = jsonToList(data);
+                        if (data.success) {
+                            messageElement.className = 'message success';
+                            messageElement.textContent = `已加载 ${data.data.length} 条车辆信息`;
+                            
+                            // 更新总车辆数
+                            totalVehiclesElement.textContent = data.total || 0;
+                            
+                            // 存储下一页游标
+                            nextVehicleCursor = data.next_cursor;
+                            
+                            // 更新分页按钮状态
+                            prevButton.disabled = currentVehicleCursor === 0;
+                            nextButton.disabled = nextVehicleCursor === null;
+                            
+                            // 填充表格数据
+                            if (data.data && data.data.length > 0) {
+                                data.data.forEach((vehicle, index) => {
+                                    const row = document.createElement('tr');
+                                    // 隔行变色效果
+                                    row.className = index % 2 === 0 ? 'even-row' : 'odd-row';
+                                    
+                                    // 点击行查询详情
+                                    row.addEventListener('click', () => {
+                                        document.getElementById('vehicleId').value = vehicle.vehicle_id;
+                                        window.getVehicleInfo();
+                                    });
+                                    
+                                    // 状态标签样式
+                                    const statusClass = vehicle.is_on_campus == 1 ? 'status-on' : 'status-off';
+                                    const statusText = vehicle.is_on_campus == 1 ? '在校' : '离校';
+                                    
+                                    row.innerHTML = `
+                                        <td class="vehicle-id">${vehicle.vehicle_id || '-'}</td>
+                                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                                        <td>${vehicle.registered_by_name || '-'}</td>
+                                        <td>${vehicle.created_at || '-'}</td>
+                                        <td>${vehicle.last_location || '-'}</td>
+                                        <td>${vehicle.last_time || '-'}</td>
+                                    `;
+                                    tableBody.appendChild(row);
+                                });
+                            } else {
+                                const emptyRow = document.createElement('tr');
+                                emptyRow.innerHTML = `<td colspan="6" style="text-align: center; padding: 20px;">
+                                    <div class="empty-state">
+                                        <span>没有找到车辆数据</span>
+                                        <button onclick="getUserVehicles()" class="refresh-btn">刷新</button>
+                                    </div>
+                                </td>`;
+                                tableBody.appendChild(emptyRow);
+                            }
+                        } else {
+                            messageElement.className = 'message error';
+                            messageElement.textContent = data.message || '获取车辆列表失败';
+                            prevButton.disabled = true;
+                            nextButton.disabled = true;
+                        }
                     })
                     .catch(error => {
-                        resultEl.innerHTML = `<p class="error">查询失败: ${error.message}</p>`;
+                        messageElement.textContent = `查询失败: ${error.message}`;
+                        messageElement.className = 'message error';
+                        prevButton.disabled = true;
+                        nextButton.disabled = true;
                     });
             }
 
-            // 获取车辆详情
+            // 车辆详情转换为表格格式（适配现有页面样式）
+            function vehicleInfoToTable(responseData) {
+                // 处理操作状态提示
+                const statusHtml = responseData.success ? 
+                    '<div class="success">查询成功</div>' : 
+                    `<div class="error">${responseData.message || '查询失败'}</div>`;
+                
+                // 获取车辆详情数据
+                const vehicleData = responseData.data || {};
+                if (Object.keys(vehicleData).length === 0) {
+                    return statusHtml + '<p>未查询到车辆信息</p>';
+                }
+
+                // 定义字段映射和格式化规则，按要求展示所有指定信息
+                const fieldMap = [
+                    { key: 'vehicle_id', label: '车辆ID', highlight: true },
+                    { key: 'registered_by_name', label: '登记人' },
+                    { key: 'is_on_campus', label: '是否在校', formatter: (val) => {
+                        return val === 1 ? '<span class="success">是</span>' : '<span class="error">否</span>';
+                    }},
+                    { key: 'last_location', label: '最后位置' },
+                    { key: 'last_time', label: '最后位置时间' },
+                    { key: 'created_at', label: '创建时间' },
+                    { key: 'updated_at', label: '更新时间' }
+                ];
+
+                // 构建表格HTML
+                let tableHtml = `
+                    <div class="vehicle-detail">
+                        ${statusHtml}
+                        <table style="border-collapse: collapse; width: 100%; margin-top: 15px; border: 1px solid var(--medium-gray);">
+                            <tbody>
+                `;
+
+                // 生成表格内容
+                fieldMap.forEach((field, index) => {
+                    if (vehicleData.hasOwnProperty(field.key)) {
+                        let value = vehicleData[field.key];
+                        // 应用格式化器
+                        if (field.formatter && typeof field.formatter === 'function') {
+                            value = field.formatter(value);
+                        } else if (value === null || value === undefined) {
+                            value = '-';
+                        }
+
+                        tableHtml += `
+                            <tr style="${index % 2 === 0 ? 'background-color: #f9f9f9;' : ''}">
+                                <td style="width: 30%; padding: 12px; border-bottom: 1px solid var(--medium-gray); font-weight: 500; ${field.highlight ? 'color: var(--secondary-color);' : ''}">
+                                    ${field.label}
+                                </td>
+                                <td style="width: 70%; padding: 12px; border-bottom: 1px solid var(--medium-gray);">
+                                    ${value}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                tableHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                return tableHtml;
+            }
+
+            // 车辆查询函数
             window.getVehicleInfo = function() {
                 const vehicleId = document.getElementById('vehicleId').value;
-                const resultEl = document.getElementById('vehicleResult');
+                const resultEl = document.getElementById('vehicleDetailResult');
                 
                 if (!vehicleId) {
                     resultEl.innerHTML = '<p class="error">请输入车辆ID</p>';
                     return;
                 }
                 
-                resultEl.innerHTML = '<p class="loading">加载中...</p>';
+                resultEl.innerHTML = '<p class="loading">查询中...</p>';
                 
                 fetch(`/user/get_user_vehicle_info?vehicle_id=${encodeURIComponent(vehicleId)}`)
                     .then(response => {
@@ -496,13 +877,38 @@
                         return response.json();
                     })
                     .then(data => {
-                        resultEl.innerHTML = jsonToList(data);
+                        // 使用表格格式化函数展示结果
+                        resultEl.innerHTML = vehicleInfoToTable(data);
                     })
                     .catch(error => {
                         resultEl.innerHTML = `<p class="error">查询失败: ${error.message}</p>`;
                     });
-            }
+            };
+
+            // 页面加载完成后初始化
+            document.addEventListener('DOMContentLoaded', function() {
+                // 绑定回车键查询功能
+                const inputField = document.getElementById('vehicleId');
+                if (inputField) {
+                    inputField.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            window.getVehicleInfo();
+                        }
+                    });
+                }
+                
+                // 页面加载完成后自动刷新车辆列表
+                getUserVehicles();
+            });
+            
+            // 页面加载完成后自动刷新数据
+            // 自动获取个人信息
+            getUserInfo();
+            // 自动获取车辆列表
+            getUserVehicles();
+    
         });
+
     </script>
 </body>
 </html>
