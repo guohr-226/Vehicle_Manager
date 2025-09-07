@@ -240,9 +240,10 @@
                     <label for="vehicleId">车辆ID <span style="color: red;">*</span></label>
                     <input type="text" id="vehicleId" required placeholder="请输入要查询的车辆ID">
                 </div>
-                <div>
-                    <button id="searchVehicle" class="btn">查询</button>
-                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="searchVehicle" class="btn">查询</button>
             </div>
             
             <div id="infoMessage" class="message"></div>
@@ -250,8 +251,6 @@
             <div id="vehicleInfoResult" class="result-box">
                 <div class="vehicle-info">
                     <p><strong>车辆ID：</strong><span id="infoVehicleId">-</span></p>
-                    <p><strong>车牌号：</strong><span id="infoLicensePlate">-</span></p>
-                    <p><strong>车辆类型：</strong><span id="infoType">-</span></p>
                     <p><strong>车辆状态：</strong><span id="infoStatus">-</span></p>
                     <p><strong>车主信息：</strong><span id="infoOwner">-</span></p>
                     <p><strong>创建时间：</strong><span id="infoCreateTime">-</span></p>
@@ -280,9 +279,8 @@
                     <thead>
                         <tr>
                             <th>车辆ID</th>
-                            <th>车牌号</th>
                             <th>车辆类型</th>
-                            <th>车辆状态</th>
+                            <th>车主信息</th>
                             <th>创建时间</th>
                         </tr>
                     </thead>
@@ -301,12 +299,15 @@
                     <button id="nextPage" class="btn btn-secondary" disabled>下一页</button>
                 </div>
             </div>
+        
+            <div style="margin-top: 15px; display: flex; justify-content: flex-end;">
+                <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
+            </div>
         </div>
         
         <div class="nav-links">
-            <a href="/admin/vehicle_manage/add">添加新车辆</a>
-            <a href="/admin/vehicle_manage/delete">删除车辆</a>
-            <a href="/admin">返回管理员首页</a>
+            <a href="{{ url_for('admin_add_vehicle_page') }}">添加新车辆</a>
+            <a href="{{ url_for('admin_delete_vehicle_page') }}">删除车辆</a>
         </div>
     </div>
 
@@ -385,11 +386,9 @@
                     // 显示车辆信息
                     if (result.data) {
                         document.getElementById('infoVehicleId').textContent = result.data.vehicle_id || '-';
-                        document.getElementById('infoLicensePlate').textContent = result.data.license_plate || '-';
-                        document.getElementById('infoType').textContent = result.data.type || '-';
-                        document.getElementById('infoStatus').innerHTML = getStatusBadge(result.data.status);
-                        document.getElementById('infoOwner').textContent = result.data.owner || '-';
-                        document.getElementById('infoCreateTime').textContent = result.data.create_time || '-';
+                        document.getElementById('infoStatus').textContent = result.data.is_on_campus ? '在校' : '离校';
+                        document.getElementById('infoOwner').textContent = result.data.registered_by_name || '-';
+                        document.getElementById('infoCreateTime').textContent = result.data.created_at || '-';
                         resultBox.classList.add('visible');
                     } else {
                         resultBox.classList.remove('visible');
@@ -445,10 +444,9 @@
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${vehicle.vehicle_id || '-'}</td>
-                                <td>${vehicle.license_plate || '-'}</td>
-                                <td>${vehicle.type || '-'}</td>
-                                <td>${getStatusBadge(vehicle.status)}</td>
-                                <td>${vehicle.create_time || '-'}</td>
+                                <td>${vehicle.is_on_campus ? '在校' : '离校' || '-'}</td>
+                                <td>${vehicle.registered_by_name || '-'}</td>
+                                <td>${vehicle.created_at || '-'}</td>
                             `;
                             tableBody.appendChild(row);
                         });

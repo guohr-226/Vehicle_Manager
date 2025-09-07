@@ -351,6 +351,7 @@ def admin_get_vehicle_info():
         f"{ADMIN_SERVER}/get_vehicle_info",
         params={'vehicle_id': vehicle_id}
     )
+    print("get_vehicle_info", result)
     return jsonify(result)
 
 @app.route('/admin/get_vehicles')

@@ -163,6 +163,7 @@
         .action-buttons {
             display: flex;
             gap: 10px;
+            margin-top: 20px;
         }
         
         .search-row {
@@ -222,23 +223,21 @@
         <div id="vehiclePreview" class="vehicle-preview">
             <div class="preview-title">车辆信息预览</div>
             <p><strong>车辆ID：</strong><span id="previewVehicleId">-</span></p>
-            <p><strong>车牌号：</strong><span id="previewLicensePlate">-</span></p>
-            <p><strong>车辆类型：</strong><span id="previewType">-</span></p>
             <p><strong>车辆状态：</strong><span id="previewStatus">-</span></p>
             <p><strong>车主信息：</strong><span id="previewOwner">-</span></p>
+            <p><strong>创建时间：</strong><span id="previewCreateTime">-</span></p>
         </div>
         
         <div class="action-buttons">
             <button id="deleteButton" class="btn" disabled>确认删除</button>
-            <a href="/admin" class="btn btn-secondary">返回首页</a>
+            <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
         </div>
         
         <div id="message" class="message"></div>
         
         <div class="nav-links">
-            <a href="/admin/vehicle_manage/add">添加新车辆</a>
-            <a href="/admin/vehicle_manage/query">查询车辆信息/列表</a>
-            <a href="/admin">返回管理员首页</a>
+            <a href="{{ url_for('admin_add_vehicle_page') }}">添加新车辆</a>
+            <a href="{{ url_for('admin_get_vehicle_page') }}">查询车辆信息/列表</a>
         </div>
     </div>
 
@@ -277,25 +276,9 @@
                     
                     // 填充预览信息
                     document.getElementById('previewVehicleId').textContent = result.data.vehicle_id || '-';
-                    document.getElementById('previewLicensePlate').textContent = result.data.license_plate || '-';
-                    document.getElementById('previewType').textContent = result.data.type || '-';
-                    
-                    // 设置状态标签
-                    let statusBadge = '-';
-                    switch(result.data.status) {
-                        case 'active':
-                            statusBadge = '<span class="badge badge-active">正常使用</span>';
-                            break;
-                        case 'maintenance':
-                            statusBadge = '<span class="badge badge-maintenance">维护中</span>';
-                            break;
-                        case 'inactive':
-                            statusBadge = '<span class="badge badge-inactive">停用</span>';
-                            break;
-                    }
-                    document.getElementById('previewStatus').innerHTML = statusBadge;
-                    
-                    document.getElementById('previewOwner').textContent = result.data.owner || '-';
+                    document.getElementById('previewStatus').textContent = result.data.is_on_campus ? '在校' : '离校';
+                    document.getElementById('previewOwner').textContent = result.data.registered_by_name || '-';
+                    document.getElementById('previewCreateTime').textContent = result.data.created_at || '-';
                     
                     // 显示预览区域并启用删除按钮
                     previewElement.classList.add('visible');
@@ -355,7 +338,13 @@
                 messageElement.className = 'message error';
             }
         });
+
+        // 为车辆ID输入框添加回车键触发查询功能
+        document.getElementById('vehicleId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchVehicle').click();
+            }
+        });
     </script>
 </body>
 </html>
-    
