@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>删除用户 - 管理员界面</title>
+    <title>删除车辆 - 管理员界面</title>
     <style>
         * {
             margin: 0;
@@ -57,7 +57,7 @@
         }
         
         input[type="text"]:focus {
-            border-color: #2ecc71;
+            border-color: #3498db;
             outline: none;
         }
         
@@ -121,7 +121,7 @@
             display: block;
         }
         
-        .user-preview {
+        .vehicle-preview {
             margin-top: 15px;
             padding: 15px;
             border-radius: 4px;
@@ -129,11 +129,11 @@
             display: none;
         }
         
-        .user-preview.visible {
+        .vehicle-preview.visible {
             display: block;
         }
         
-        .user-preview p {
+        .vehicle-preview p {
             margin-bottom: 8px;
         }
         
@@ -175,57 +175,82 @@
             flex-grow: 1;
             margin-bottom: 0;
         }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .badge-active {
+            background-color: #d5f5e3;
+            color: #27ae60;
+        }
+        
+        .badge-maintenance {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-inactive {
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>删除用户</h1>
+        <h1>删除车辆</h1>
         
         <div class="warning">
             <div class="warning-icon">⚠️</div>
             <div>
-                <strong>警告：</strong>删除用户操作不可恢复，相关用户数据可能会受到影响。请确认该用户不再使用后再执行删除操作。
+                <strong>警告：</strong>删除车辆操作不可恢复，相关的传感器关联和历史数据可能会受到影响。请确认该车辆不再使用后再执行删除操作。
             </div>
         </div>
         
         <div class="search-row">
             <div class="form-group">
-                <label for="username">用户名 <span style="color: red;">*</span></label>
-                <input type="text" id="username" required placeholder="请输入要删除的用户名">
+                <label for="vehicleId">车辆ID <span style="color: red;">*</span></label>
+                <input type="text" id="vehicleId" required placeholder="请输入要删除的车辆ID">
             </div>
-            <button id="searchUser" class="btn btn-secondary">查询用户</button>
+            <button id="searchVehicle" class="btn btn-secondary">查询车辆</button>
         </div>
         
-        <div id="userPreview" class="user-preview">
-            <div class="preview-title">用户信息预览</div>
-                <p><strong>用户名：</strong><span id="previewUsername">-</span></p>
-                <p><strong>是否管理员：</strong><span id="previewUserRole">-</span></p>
-                <p><strong>创建时间：</strong><span id="previewUserCreateTime">-</span></p>
+        <div id="vehiclePreview" class="vehicle-preview">
+            <div class="preview-title">车辆信息预览</div>
+            <p><strong>车辆ID：</strong><span id="previewVehicleId">-</span></p>
+            <p><strong>车牌号：</strong><span id="previewLicensePlate">-</span></p>
+            <p><strong>车辆类型：</strong><span id="previewType">-</span></p>
+            <p><strong>车辆状态：</strong><span id="previewStatus">-</span></p>
+            <p><strong>车主信息：</strong><span id="previewOwner">-</span></p>
         </div>
         
         <div class="action-buttons">
             <button id="deleteButton" class="btn" disabled>确认删除</button>
-            <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
+            <a href="/admin" class="btn btn-secondary">返回首页</a>
         </div>
         
         <div id="message" class="message"></div>
         
         <div class="nav-links">
-            <li class="function-item"><a href="{{ url_for('admin_add_user_page') }}" class="function-link">添加新用户</a></li>
-            <li class="function-item"><a href="{{ url_for('admin_change_paseeword_page') }}" class="function-link">修改用户密码</a></li>
-            <li class="function-item"><a href="{{ url_for('admin_get_user_page') }}" class="function-link">查询用户信息</a></li>
+            <a href="/admin/vehicle_manage/add">添加新车辆</a>
+            <a href="/admin/vehicle_manage/query">查询车辆信息/列表</a>
+            <a href="/admin">返回管理员首页</a>
         </div>
     </div>
 
     <script>
-        // 存储当前查询到的用户名
-        let currentUsername = null;
+        // 存储当前查询到的车辆ID
+        let currentVehicleId = null;
         
-        // 查询用户信息
-        document.getElementById('searchUser').addEventListener('click', async function() {
-            const username = document.getElementById('username').value.trim();
+        // 查询车辆信息
+        document.getElementById('searchVehicle').addEventListener('click', async function() {
+            const vehicleId = document.getElementById('vehicleId').value.trim();
             const messageElement = document.getElementById('message');
-            const previewElement = document.getElementById('userPreview');
+            const previewElement = document.getElementById('vehiclePreview');
             const deleteButton = document.getElementById('deleteButton');
             
             // 重置状态
@@ -233,33 +258,51 @@
             messageElement.className = 'message';
             previewElement.classList.remove('visible');
             deleteButton.disabled = true;
-            currentUsername = null;
+            currentVehicleId = null;
             
-            if (!username) {
-                messageElement.textContent = '请输入用户名';
+            if (!vehicleId) {
+                messageElement.textContent = '请输入车辆ID';
                 messageElement.className = 'message error';
                 return;
             }
             
             try {
-                const response = await fetch(`/admin/get_user_info?name=${encodeURIComponent(username)}`);
+                const response = await fetch(`/admin/get_vehicle_info?vehicle_id=${encodeURIComponent(vehicleId)}`);
                 const result = await response.json();
                 
                 if (result.success && result.data) {
-                    // 显示用户信息
-                    messageElement.textContent = '用户查询成功';
+                    // 显示车辆信息
+                    messageElement.textContent = '车辆查询成功';
                     messageElement.className = 'message success';
+                    
                     // 填充预览信息
-                    document.getElementById('previewUsername').textContent = result.data.name || '-';
-                    document.getElementById('previewUserRole').textContent = result.data.is_admin ? '是' : '否';
-                    document.getElementById('previewUserCreateTime').textContent = result.data.created_at || '-';
+                    document.getElementById('previewVehicleId').textContent = result.data.vehicle_id || '-';
+                    document.getElementById('previewLicensePlate').textContent = result.data.license_plate || '-';
+                    document.getElementById('previewType').textContent = result.data.type || '-';
+                    
+                    // 设置状态标签
+                    let statusBadge = '-';
+                    switch(result.data.status) {
+                        case 'active':
+                            statusBadge = '<span class="badge badge-active">正常使用</span>';
+                            break;
+                        case 'maintenance':
+                            statusBadge = '<span class="badge badge-maintenance">维护中</span>';
+                            break;
+                        case 'inactive':
+                            statusBadge = '<span class="badge badge-inactive">停用</span>';
+                            break;
+                    }
+                    document.getElementById('previewStatus').innerHTML = statusBadge;
+                    
+                    document.getElementById('previewOwner').textContent = result.data.owner || '-';
                     
                     // 显示预览区域并启用删除按钮
                     previewElement.classList.add('visible');
                     deleteButton.disabled = false;
-                    currentUsername = username;
+                    currentVehicleId = vehicleId;
                 } else {
-                    messageElement.textContent = result.message || '未找到该用户';
+                    messageElement.textContent = result.message || '未找到该车辆';
                     messageElement.className = 'message error';
                 }
             } catch (error) {
@@ -268,26 +311,26 @@
             }
         });
         
-        // 确认删除用户
+        // 确认删除车辆
         document.getElementById('deleteButton').addEventListener('click', async function() {
-            if (!currentUsername) {
+            if (!currentVehicleId) {
                 return;
             }
             
             // 二次确认
-            if (!confirm(`确定要删除用户"${currentUsername}"吗？此操作不可恢复！`)) {
+            if (!confirm(`确定要删除车辆ID为"${currentVehicleId}"的车辆吗？此操作不可恢复！`)) {
                 return;
             }
             
             const messageElement = document.getElementById('message');
-            const previewElement = document.getElementById('userPreview');
+            const previewElement = document.getElementById('vehiclePreview');
             const deleteButton = document.getElementById('deleteButton');
             
             try {
                 const formData = new FormData();
-                formData.append('username', currentUsername);
+                formData.append('vehicle_id', currentVehicleId);
                 
-                const response = await fetch('/admin/delete_user', {
+                const response = await fetch('/admin/delete_vehicle', {
                     method: 'POST',
                     body: formData
                 });
@@ -295,14 +338,14 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    messageElement.textContent = result.message || '用户删除成功';
+                    messageElement.textContent = result.message || '车辆删除成功';
                     messageElement.className = 'message success';
                     
                     // 重置界面状态
                     previewElement.classList.remove('visible');
                     deleteButton.disabled = true;
-                    document.getElementById('username').value = '';
-                    currentUsername = null;
+                    document.getElementById('vehicleId').value = '';
+                    currentVehicleId = null;
                 } else {
                     messageElement.textContent = result.message || '删除失败';
                     messageElement.className = 'message error';
@@ -315,3 +358,4 @@
     </script>
 </body>
 </html>
+    

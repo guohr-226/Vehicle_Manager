@@ -177,10 +177,9 @@
                 <div class="card-header" style="background-color: #f39c12;">车辆管理</div>
                 <div class="card-body">
                     <ul class="function-list">
-                        <li class="function-item"><a href="/admin/vehicle_manage/add" class="function-link">添加新车辆</a></li>
-                        <li class="function-item"><a href="/admin/vehicle_manage/delete" class="function-link">删除车辆</a></li>
-                        <li class="function-item"><a href="/admin/vehicle_manage/query" class="function-link">查询车辆信息</a></li>
-                        <li class="function-item"><a href="/admin/vehicle_manage/list" class="function-link">车辆列表（分页）</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_add_vehicle_page') }}" class="function-link">添加新车辆</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_delete_vehicle_page') }}" class="function-link">删除车辆</a></li>
+                        <li class="function-item"><a href="{{ url_for('admin_get_vehicle_page') }}" class="function-link">查询车辆信息</a></li>
                     </ul>
                 </div>
             </div>

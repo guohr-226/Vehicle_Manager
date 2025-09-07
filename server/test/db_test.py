@@ -128,14 +128,14 @@ def test_vehicle_management(db):
     print("\n1. 测试添加车辆")
     success, msg = db.add_vehicle(
         vehicle_id="ABC123",
-        registered_by=test_user_id,
+        registered_by="test_user",
         is_on_campus=False
     )
     print(f"添加车辆ABC123: {'成功' if success else '失败'}, 消息: {msg}")
     
     success, msg = db.add_vehicle(
         vehicle_id="XYZ789",
-        registered_by=test_user_id,
+        registered_by="test_user",
         is_on_campus=True
     )
     print(f"添加车辆XYZ789: {'成功' if success else '失败'}, 消息: {msg}")
@@ -143,7 +143,7 @@ def test_vehicle_management(db):
     # 添加重复车辆
     success, msg = db.add_vehicle(
         vehicle_id="ABC123",
-        registered_by=test_user_id
+        registered_by="test_user"
     )
     print(f"添加重复车辆: {'成功' if success else '失败'}, 消息: {msg}")
     
@@ -254,7 +254,7 @@ def main():
     # 初始化数据库
     db = VehicleDB()
     # 可修改为实际测试路径
-    success = db.initialize("/home/ghr226/iot/server/vehicle_db.db")
+    success = db.initialize("test_vehicle_db.db")
     if not success:
         print("数据库初始化失败，无法进行测试")
         return

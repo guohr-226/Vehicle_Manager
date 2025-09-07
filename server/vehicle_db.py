@@ -134,17 +134,17 @@ class VehicleDB:
                 return False
 
             # 添加测试车辆
-            success, msg = self.add_vehicle("ABC123", user_id0)
+            success, msg = self.add_vehicle("ABC123", "test_user0")
             if not success:
                 print(f"添加车辆ABC123失败: {msg}")
                 return False
                 
-            success, msg = self.add_vehicle("XYZ789", user_id0)
+            success, msg = self.add_vehicle("XYZ789", "test_user0")
             if not success:
                 print(f"添加车辆XYZ789失败: {msg}")
                 return False
             
-            success, msg = self.add_vehicle("CDE567", user_id1)
+            success, msg = self.add_vehicle("CDE567", "test_user1")
             if not success:
                 print(f"添加车辆CDE567失败: {msg}")
                 return False
@@ -329,6 +329,21 @@ class VehicleDB:
 
         return self._retry_operation(operation)
 
+    def get_user_id_by_name(self, name: str) -> Tuple[bool, int]:
+        """根据用户名获取用户ID"""
+        def operation():
+            cursor = self._get_thread_cursor()
+            try:
+                cursor.execute("SELECT id FROM users WHERE name = ?", (name,))
+                user = cursor.fetchone()
+                if not user:
+                    return (False, -1)
+                return (True, user['id'])
+            except Exception as e:
+                return (False, -1)
+        
+        return self._retry_operation(operation)
+
     # 传感器管理函数
     def add_sensor(self, sensor_id: str, location: str, description: str = "", 
                   is_active: bool = True, is_gate: bool = False) -> Tuple[bool, str]:
@@ -387,14 +402,18 @@ class VehicleDB:
                 if cursor.fetchone():
                     return (False, "车辆已注册")
                 
-                cursor.execute("SELECT id FROM users WHERE id = ?", (registered_by,))
+                success, user_id = self.get_user_id_by_name(registered_by)
+                if not success:
+                    print("获取用户ID失败")
+
+                cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
                 if not cursor.fetchone():
                     return (False, "注册人不存在")
                 
                 cursor.execute(
                     """INSERT INTO vehicles (vehicle_id, is_on_campus, registered_by) 
                        VALUES (?, ?, ?)""",
-                    (vehicle_id, is_on_campus, registered_by)
+                    (vehicle_id, is_on_campus, user_id)
                 )
                 self._get_thread_connection().commit()
                 return (True, "车辆注册成功")

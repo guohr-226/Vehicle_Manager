@@ -169,7 +169,6 @@ def admin_get_user_page():
 def admin_get_user_info():
     if not is_admin():
         return jsonify({'success': False, 'message': '权限不足'})
-    
     name = request.args.get('name')
     if not name:
         return jsonify({'success': False, 'message': '用户名为必填项'})
@@ -178,6 +177,7 @@ def admin_get_user_info():
         f"{ADMIN_SERVER}/get_user_info",
         params={'name': name}
     )
+    print("get_user_info", result)
     return jsonify(result)
 
 @app.route('/admin/get_users')
@@ -284,6 +284,12 @@ def admin_get_sensors():
     )
     return jsonify(result)
 
+@app.route('/admin/add_vehicle_page')
+def admin_add_vehicle_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_add_vehicle.html')
+
 @app.route('/admin/add_vehicle', methods=['POST'])
 def admin_add_vehicle():
     if not is_admin():
@@ -304,6 +310,12 @@ def admin_add_vehicle():
     )
     return jsonify(result)
 
+@app.route('/admin/delete_vehicle_page')
+def admin_delete_vehicle_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_delete_vehicle.html')
+
 @app.route('/admin/delete_vehicle', methods=['POST'])
 def admin_delete_vehicle():
     if not is_admin():
@@ -319,6 +331,12 @@ def admin_delete_vehicle():
         json={'vehicle_id': vehicle_id}
     )
     return jsonify(result)
+
+@app.route('/admin/get_vehicle_page')
+def admin_get_vehicle_page():
+    if not is_admin():
+        return redirect(url_for('login'))
+    return render_template('admin_get_vehicle.html')
 
 @app.route('/admin/get_vehicle_info')
 def admin_get_vehicle_info():

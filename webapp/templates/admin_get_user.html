@@ -210,11 +210,12 @@
                     <label for="username">用户名 <span style="color: red;">*</span></label>
                     <input type="text" id="username" name="name" required placeholder="请输入要查询的用户名">
                 </div>
-                <div style="align-self: flex-end;">
-                    <button type="submit" class="btn">查询</button>
-                </div>
             </form>
             
+            <div class="action-buttons">
+                <button id="searchUser" class="btn">查询</button>
+            </div>
+
             <div id="infoMessage" class="message"></div>
             
             <div id="userInfoResult" class="result-box">
@@ -222,7 +223,6 @@
                     <p><strong>用户名：</strong><span id="infoName">-</span></p>
                     <p><strong>是否管理员：</strong><span id="infoIsAdmin">-</span></p>
                     <p><strong>创建时间：</strong><span id="infoCreateTime">-</span></p>
-                    <p><strong>最后登录时间：</strong><span id="infoLastLogin">-</span></p>
                 </div>
             </div>
         </div>
@@ -250,7 +250,6 @@
                             <th>用户名</th>
                             <th>是否管理员</th>
                             <th>创建时间</th>
-                            <th>最后登录时间</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody">
@@ -291,7 +290,7 @@
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
             // 绑定表单提交事件
-            document.getElementById('userInfoForm').addEventListener('submit', fetchUserInfo);
+            document.getElementById('searchUser').addEventListener('click', fetchUserInfo);
             
             // 绑定列表刷新按钮事件
             document.getElementById('refreshList').addEventListener('click', () => {
@@ -339,8 +338,7 @@
                     if (result.data) {
                         document.getElementById('infoName').textContent = result.data.name || '-';
                         document.getElementById('infoIsAdmin').textContent = result.data.is_admin ? '是' : '否';
-                        document.getElementById('infoCreateTime').textContent = result.data.create_time || '-';
-                        document.getElementById('infoLastLogin').textContent = result.data.last_login || '-';
+                        document.getElementById('infoCreateTime').textContent = result.data.created_at || '-';
                         resultBox.classList.add('visible');
                     } else {
                         resultBox.classList.remove('visible');
@@ -397,8 +395,7 @@
                             row.innerHTML = `
                                 <td>${user.name || '-'}</td>
                                 <td>${user.is_admin ? '是' : '否'}</td>
-                                <td>${user.create_time || '-'}</td>
-                                <td>${user.last_login || '-'}</td>
+                                <td>${user.created_at || '-'}</td>
                             `;
                             tableBody.appendChild(row);
                         });

@@ -125,7 +125,6 @@ class AdminHTTPHandler(BaseHTTPRequestHandler):
                 self._set_response(400)
                 self.wfile.write(json.dumps(response).encode('utf-8'))
                 return
-                
             success, message = self.db.add_vehicle(vehicle_id, registered_by)
             response = {"success": success, "message": message}
             self._set_response()

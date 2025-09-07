@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>传感器查询与列表 - 管理员界面</title>
+    <title>车辆查询与列表 - 管理员界面</title>
     <style>
         * {
             margin: 0;
@@ -37,7 +37,7 @@
         }
         
         h2 {
-            color: #27ae60;
+            color: #3498db;
             margin: 25px 0 15px;
             font-size: 1.3rem;
             padding-bottom: 8px;
@@ -67,12 +67,12 @@
         
         input[type="text"]:focus,
         input[type="number"]:focus {
-            border-color: #2ecc71;
+            border-color: #3498db;
             outline: none;
         }
         
         .btn {
-            background-color: #2ecc71;
+            background-color: #3498db;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -83,7 +83,7 @@
         }
         
         .btn:hover {
-            background-color: #27ae60;
+            background-color: #2980b9;
         }
         
         .btn-secondary {
@@ -136,7 +136,7 @@
             display: block;
         }
         
-        .sensor-info p {
+        .vehicle-info p {
             margin-bottom: 8px;
         }
         
@@ -212,12 +212,17 @@
             font-weight: 500;
         }
         
-        .badge-yes {
+        .badge-active {
             background-color: #d5f5e3;
             color: #27ae60;
         }
         
-        .badge-no {
+        .badge-maintenance {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-inactive {
             background-color: #f1f2f6;
             color: #7f8c8d;
         }
@@ -225,37 +230,38 @@
 </head>
 <body>
     <div class="container">
-        <h1>传感器查询与列表管理</h1>
+        <h1>车辆查询与列表管理</h1>
         
-        <!-- 单个传感器查询区域 -->
+        <!-- 单个车辆查询区域 -->
         <div class="section">
-            <h2>查询传感器信息</h2>
+            <h2>查询车辆信息</h2>
             <div class="controls">
                 <div class="form-group search-control">
-                    <label for="sensorId">传感器ID <span style="color: red;">*</span></label>
-                    <input type="text" id="sensorId" required placeholder="请输入要查询的传感器ID">
+                    <label for="vehicleId">车辆ID <span style="color: red;">*</span></label>
+                    <input type="text" id="vehicleId" required placeholder="请输入要查询的车辆ID">
                 </div>
-            </div>
-            
-            <div class="action-buttons">
-                <button id="searchSensor" class="btn">查询</button>
+                <div>
+                    <button id="searchVehicle" class="btn">查询</button>
+                </div>
             </div>
             
             <div id="infoMessage" class="message"></div>
             
-            <div id="sensorInfoResult" class="result-box">
-                <div class="sensor-info">
-                    <p><strong>传感器ID：</strong><span id="infoSensorId">-</span></p>
-                    <p><strong>安装位置：</strong><span id="infoLocation">-</span></p>
-                    <p><strong>是否为出入口传感器：</strong><span id="infoIsGate">-</span></p>
+            <div id="vehicleInfoResult" class="result-box">
+                <div class="vehicle-info">
+                    <p><strong>车辆ID：</strong><span id="infoVehicleId">-</span></p>
+                    <p><strong>车牌号：</strong><span id="infoLicensePlate">-</span></p>
+                    <p><strong>车辆类型：</strong><span id="infoType">-</span></p>
+                    <p><strong>车辆状态：</strong><span id="infoStatus">-</span></p>
+                    <p><strong>车主信息：</strong><span id="infoOwner">-</span></p>
                     <p><strong>创建时间：</strong><span id="infoCreateTime">-</span></p>
                 </div>
             </div>
         </div>
         
-        <!-- 传感器列表区域 -->
+        <!-- 车辆列表区域 -->
         <div class="section">
-            <h2>传感器列表</h2>
+            <h2>车辆列表</h2>
             
             <div class="controls">
                 <div class="form-group limit-control">
@@ -270,16 +276,17 @@
             <div id="listMessage" class="message"></div>
             
             <div class="table-container">
-                <table id="sensorTable">
+                <table id="vehicleTable">
                     <thead>
                         <tr>
-                            <th>传感器ID</th>
-                            <th>安装位置</th>
-                            <th>是否为出入口传感器</th>
+                            <th>车辆ID</th>
+                            <th>车牌号</th>
+                            <th>车辆类型</th>
+                            <th>车辆状态</th>
                             <th>创建时间</th>
                         </tr>
                     </thead>
-                    <tbody id="sensorTableBody">
+                    <tbody id="vehicleTableBody">
                         <!-- 表格内容将通过JavaScript动态填充 -->
                     </tbody>
                 </table>
@@ -287,23 +294,19 @@
             
             <div class="pagination">
                 <div>
-                    总传感器数: <span id="totalSensors">0</span>
+                    总车辆数: <span id="totalVehicles">0</span>
                 </div>
                 <div>
                     <button id="prevPage" class="btn btn-secondary" disabled>上一页</button>
                     <button id="nextPage" class="btn btn-secondary" disabled>下一页</button>
                 </div>
             </div>
-            
-            <div style="margin-top: 15px; display: flex; justify-content: flex-end;">
-                <a href="/admin" class="btn btn-secondary" style="text-decoration: none;">返回首页</a>
-            </div>
-
         </div>
         
         <div class="nav-links">
-            <li class="function-item"><a href="{{ url_for('admin_add_cursor_page') }}" class="function-link">添加/更新传感器</a></li>
-            <li class="function-item"><a href="{{ url_for('admin_delete_cursor_page') }}" class="function-link">删除传感器</a></li>
+            <a href="/admin/vehicle_manage/add">添加新车辆</a>
+            <a href="/admin/vehicle_manage/delete">删除车辆</a>
+            <a href="/admin">返回管理员首页</a>
         </div>
     </div>
 
@@ -316,48 +319,62 @@
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
             // 绑定查询按钮事件
-            document.getElementById('searchSensor').addEventListener('click', fetchSensorInfo);
+            document.getElementById('searchVehicle').addEventListener('click', fetchVehicleInfo);
             
             // 绑定列表刷新按钮事件
             document.getElementById('refreshList').addEventListener('click', () => {
                 currentCursor = 0;
-                fetchSensorList();
+                fetchVehicleList();
             });
             
             // 绑定分页按钮事件
             document.getElementById('prevPage').addEventListener('click', () => {
                 if (currentCursor > 0) {
                     currentCursor = Math.max(0, currentCursor - currentLimit);
-                    fetchSensorList();
+                    fetchVehicleList();
                 }
             });
             
             document.getElementById('nextPage').addEventListener('click', () => {
                 if (nextCursor !== null) {
                     currentCursor = nextCursor;
-                    fetchSensorList();
+                    fetchVehicleList();
                 }
             });
             
-            // 初始化加载传感器列表
-            fetchSensorList();
+            // 初始化加载车辆列表
+            fetchVehicleList();
         });
         
-        // 查询单个传感器信息
-        async function fetchSensorInfo() {
-            const sensorId = document.getElementById('sensorId').value.trim();
+        // 获取状态标签的HTML
+        function getStatusBadge(status) {
+            switch(status) {
+                case 'active':
+                    return '<span class="badge badge-active">正常使用</span>';
+                case 'maintenance':
+                    return '<span class="badge badge-maintenance">维护中</span>';
+                case 'inactive':
+                    return '<span class="badge badge-inactive">停用</span>';
+                default:
+                    return '-';
+            }
+        }
+        
+        // 查询单个车辆信息
+        async function fetchVehicleInfo() {
+            const vehicleId = document.getElementById('vehicleId').value.trim();
             const messageElement = document.getElementById('infoMessage');
-            const resultBox = document.getElementById('sensorInfoResult');
+            const resultBox = document.getElementById('vehicleInfoResult');
             
-            if (!sensorId) {
-                messageElement.textContent = '请输入传感器ID';
+            if (!vehicleId) {
+                messageElement.textContent = '请输入车辆ID';
                 messageElement.className = 'message error';
                 resultBox.classList.remove('visible');
                 return;
             }
             
             try {
-                const response = await fetch(`/admin/get_sensor_info?sensor_id=${encodeURIComponent(sensorId)}`);
+                const response = await fetch(`/admin/get_vehicle_info?vehicle_id=${encodeURIComponent(vehicleId)}`);
                 const result = await response.json();
                 
                 // 显示消息
@@ -365,14 +382,14 @@
                 if (result.success) {
                     messageElement.className = 'message success';
                     
-                    // 显示传感器信息
+                    // 显示车辆信息
                     if (result.data) {
-                        document.getElementById('infoSensorId').textContent = result.data.sensor_id || '-';
-                        document.getElementById('infoLocation').textContent = result.data.location || '-';
-                        document.getElementById('infoIsGate').innerHTML = result.data.is_gate 
-                            ? '<span class="badge badge-yes">是</span>' 
-                            : '<span class="badge badge-no">否</span>';
-                        document.getElementById('infoCreateTime').textContent = result.data.created_at || '-';
+                        document.getElementById('infoVehicleId').textContent = result.data.vehicle_id || '-';
+                        document.getElementById('infoLicensePlate').textContent = result.data.license_plate || '-';
+                        document.getElementById('infoType').textContent = result.data.type || '-';
+                        document.getElementById('infoStatus').innerHTML = getStatusBadge(result.data.status);
+                        document.getElementById('infoOwner').textContent = result.data.owner || '-';
+                        document.getElementById('infoCreateTime').textContent = result.data.create_time || '-';
                         resultBox.classList.add('visible');
                     } else {
                         resultBox.classList.remove('visible');
@@ -388,14 +405,14 @@
             }
         }
         
-        // 获取传感器列表
-        async function fetchSensorList() {
+        // 获取车辆列表
+        async function fetchVehicleList() {
             const limit = parseInt(document.getElementById('limit').value) || 20;
             currentLimit = Math.min(Math.max(limit, 1), 100); // 确保在1-100范围内
             
             const messageElement = document.getElementById('listMessage');
-            const tableBody = document.getElementById('sensorTableBody');
-            const totalSensorsElement = document.getElementById('totalSensors');
+            const tableBody = document.getElementById('vehicleTableBody');
+            const totalVehiclesElement = document.getElementById('totalVehicles');
             const prevButton = document.getElementById('prevPage');
             const nextButton = document.getElementById('nextPage');
             
@@ -405,15 +422,15 @@
             messageElement.className = 'message';
             
             try {
-                const response = await fetch(`/admin/get_sensors?cursor=${currentCursor}&limit=${currentLimit}`);
+                const response = await fetch(`/admin/get_vehicles?cursor=${currentCursor}&limit=${currentLimit}`);
                 const result = await response.json();
                 
                 if (result.success) {
                     messageElement.className = 'message success';
-                    messageElement.textContent = `已加载 ${result.data.length} 条传感器信息`;
+                    messageElement.textContent = `已加载 ${result.data.length} 条车辆信息`;
                     
-                    // 更新总传感器数
-                    totalSensorsElement.textContent = result.total || 0;
+                    // 更新总车辆数
+                    totalVehiclesElement.textContent = result.total || 0;
                     
                     // 存储下一页游标
                     nextCursor = result.next_cursor;
@@ -424,29 +441,30 @@
                     
                     // 填充表格数据
                     if (result.data && result.data.length > 0) {
-                        result.data.forEach(sensor => {
+                        result.data.forEach(vehicle => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td>${sensor.sensor_id || '-'}</td>
-                                <td>${sensor.location || '-'}</td>
-                                <td>${sensor.is_gate ? '<span class="badge badge-yes">是</span>' : '<span class="badge badge-no">否</span>'}</td>
-                                <td>${sensor.created_at || '-'}</td>
+                                <td>${vehicle.vehicle_id || '-'}</td>
+                                <td>${vehicle.license_plate || '-'}</td>
+                                <td>${vehicle.type || '-'}</td>
+                                <td>${getStatusBadge(vehicle.status)}</td>
+                                <td>${vehicle.create_time || '-'}</td>
                             `;
                             tableBody.appendChild(row);
                         });
                     } else {
                         const emptyRow = document.createElement('tr');
-                        emptyRow.innerHTML = `<td colspan="4" style="text-align: center;">没有找到传感器数据</td>`;
+                        emptyRow.innerHTML = `<td colspan="5" style="text-align: center;">没有找到车辆数据</td>`;
                         tableBody.appendChild(emptyRow);
                     }
                 } else {
                     messageElement.className = 'message error';
-                    messageElement.textContent = result.message || '获取传感器列表失败';
+                    messageElement.textContent = result.message || '获取车辆列表失败';
                     prevButton.disabled = true;
                     nextButton.disabled = true;
                 }
             } catch (error) {
-                messageElement.textContent = '网络错误，加载传感器列表失败';
+                messageElement.textContent = '网络错误，加载车辆列表失败';
                 messageElement.className = 'message error';
                 prevButton.disabled = true;
                 nextButton.disabled = true;
@@ -455,4 +473,3 @@
     </script>
 </body>
 </html>
-
